@@ -57,6 +57,9 @@
 #include "opencv2/stitching/detail/warpers.hpp"
 #include "opencv2/stitching/warpers.hpp"
 
+#include<QDir>
+#include<QString>
+
 using namespace std;
 using namespace cv;
 using namespace cv::detail;
@@ -120,7 +123,7 @@ static void printUsage()
 
 
 // Default command line args
-vector<string> img_names;
+std::vector<std::string> img_names;
 bool preview = false;
 bool try_gpu = false;
 double work_megapix = 0.6;
@@ -141,17 +144,18 @@ string seam_find_type = "gc_color";
 int blend_type = Blender::MULTI_BAND;
 float blend_strength = 5;
 string result_name = "result.jpg";
+QDir directory;
 
 #undef ENABLE_LOG
 #define ENABLE_LOG 1
 
 static int parseCmdArgs(int argc, char** argv)
 {
-    if (argc == 1)
-    {
-        printUsage();
-        return -1;
-    }
+//    if (argc == 1)
+//    {
+//        printUsage();
+//        return -1;
+//    }
     for (int i = 1; i < argc; ++i)
     {
         if (string(argv[i]) == "--help" || string(argv[i]) == "/?")
@@ -159,6 +163,9 @@ static int parseCmdArgs(int argc, char** argv)
             printUsage();
             return -1;
         }
+	else if (string(argv[i]) == "--path") {
+	  directory = QDir("/home/lemaitre/Desktop/stitching-ptz/bin/sphere");
+	}
         else if (string(argv[i]) == "--preview")
         {
             preview = true;
@@ -316,8 +323,8 @@ static int parseCmdArgs(int argc, char** argv)
             result_name = argv[i + 1];
             i++;
 	  }
-        else
-	  img_names.push_back(argv[i]);
+//        else
+//      img_names.push_back(argv[i]);
     }
     if (preview)
       {
@@ -334,14 +341,24 @@ int main(int argc, char* argv[])
 #endif
   cv::setBreakOnError(true);
 
+
+  QStringList listFiles;
+  QStringList filters;
+  filters << "*.jpg";
+  listFiles=directory.entryList(filters,QDir::Files);
+
+  for (int ii=0;ii<listFiles.size();ii++){
+    img_names.push_back(directory.absoluteFilePath(listFiles[ii]).toStdString());
+      cout<<img_names[ii]<<endl;
+  }
+
   int retval = parseCmdArgs(argc, argv);
   if (retval)
     return retval;
 
   // Check if have enough images
   int num_images = static_cast<int>(img_names.size());
-  if (num_images < 2)
-    {
+  if (num_images < 2){
       LOGLN("Need more images");
       return -1;
     }
@@ -364,7 +381,7 @@ int main(int argc, char* argv[])
 	finder = new SurfFeaturesFinderGpu();
       else
 #endif
-	finder = new SurfFeaturesFinder(2000.);
+	finder = new SurfFeaturesFinder(5000.);
     }
   else if (features_type == "orb")
     {
@@ -386,6 +403,8 @@ int main(int argc, char* argv[])
     {
       full_img = imread(img_names[i]);
       full_img_sizes[i] = full_img.size();
+
+      std::cout << img_names[i] << std::endl;
 
       if (full_img.empty())
         {

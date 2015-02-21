@@ -26,7 +26,7 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += ./stitching_detailed.cpp \
+SOURCES += ./src/stitching_detailed.cpp \
 
 # Support c++11
 QMAKE_CXXFLAGS += -std=c++11
