@@ -144,7 +144,6 @@ string seam_find_type = "gc_color";
 int blend_type = Blender::MULTI_BAND;
 float blend_strength = 5;
 string result_name = "result.jpg";
-QDir directory;
 
 #undef ENABLE_LOG
 #define ENABLE_LOG 1
@@ -163,10 +162,7 @@ static int parseCmdArgs(int argc, char** argv)
             printUsage();
             return -1;
         }
-	else if (string(argv[i]) == "--path") {
-	  directory = QDir("/home/lemaitre/Desktop/stitching-ptz/bin/sphere");
-	}
-        else if (string(argv[i]) == "--preview")
+	else if (string(argv[i]) == "--preview")
         {
             preview = true;
         }
@@ -343,6 +339,7 @@ int main(int argc, char* argv[])
 
 
   QStringList listFiles;
+  QDir directory("/home/glemaitre/Work/stitching-ptz/data");
   QStringList filters;
   filters << "*.jpg";
   listFiles=directory.entryList(filters,QDir::Files);
